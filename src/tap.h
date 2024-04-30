@@ -27,6 +27,10 @@ class TAP : public QObject
 public:
     explicit TAP(QObject *parent = 0);
     void send(const QByteArray &data);
+    void mtuChanged(int mtu);
+
+private:
+    void iffReset(int mtu);
 
 signals:
     void dataAvailable(const QByteArray &data);
@@ -35,6 +39,7 @@ private slots:
     void fdActivated();
 
 private:
+    QString mIfaceName;
     QSocketNotifier *mNotifier;
     int mFd;
 };

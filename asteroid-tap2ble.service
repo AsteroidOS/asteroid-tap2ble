@@ -3,12 +3,16 @@ Description=Starts the AsteroidOS IP over BLE connectivity daemon
 Requires=dbus.socket
 After=bluetooth.service
 ConditionUser=root
- 
+
 [Service]
 Type=simple
 ExecStart=/usr/bin/asteroid-tap2ble
 Restart=always
- 
+User=ceres
+Group=ceres
+AmbientCapabilities=CAP_NET_ADMIN
+NoNewPrivileges=true
+
 [Install]
 WantedBy=default.target
 

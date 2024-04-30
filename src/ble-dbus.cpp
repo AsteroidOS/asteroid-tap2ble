@@ -18,8 +18,20 @@
 #include "ble-dbus.h"
 
 // Called when a companion writes to the RX characteristic
-void RXChrc::WriteValue(QByteArray data, QVariantMap) {
+void RXChrc::WriteValue(QByteArray data, QVariantMap properties) {
+    if (properties.contains("mtu")) {
+        emit mtuChanged(properties["mtu"].toUInt());
+    } else
+        qWarning() << "mtu not in WriteValue";
     emit receivedFromCompanion(data);
+}
+
+QByteArray TXChrc::ReadValue(QVariantMap properties) {
+    if (properties.contains("mtu")) {
+        emit mtuChanged(properties["mtu"].toUInt());
+    } else
+        qWarning() << "mtu not in ReadValue";
+    return m_value;
 }
 
 // Forwards information to the companion by notifications on the TX characteristic
