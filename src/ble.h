@@ -47,17 +47,18 @@ private:
     QString mAdapter;
     bool mConnected;
 
+    int mCurrentMtu;
+
     void updateAdapter();
     void setAdapter(QString adatper);
     void setConnected(bool connected);
-
-    QByteArray mAccumulatedRecv;
 
 signals:
     void connectedChanged();
     void adapterChanged();
 
     void receivedFromCompanion(const QByteArray &data);
+    void mtuChanged(int mtu);
 
 public slots:
     void bluezServiceRegistered(const QString &name);
@@ -67,6 +68,8 @@ public slots:
 
     void onConnectedChanged();
     void onAdapterChanged();
+
+    void onMtuChanged(int);
 
 private slots:
     void onReceivedFromCompanion(const QByteArray &data);

@@ -35,6 +35,8 @@
 #define GATT_DESC_IFACE              "org.bluez.GattDescriptor1"
 
 BLE::BLE(QObject *parent) : QObject(parent), mBus(QDBusConnection::systemBus()) {
+    mCurrentMtu = -1;
+
     qDBusRegisterMetaType<InterfaceList>();
     qDBusRegisterMetaType<ManagedObjectList>();
 
@@ -58,6 +60,9 @@ BLE::BLE(QObject *parent) : QObject(parent), mBus(QDBusConnection::systemBus()) 
     connect(this, SIGNAL(connectedChanged()), this, SLOT(onConnectedChanged()));
 
     connect(&mRX, SIGNAL(receivedFromCompanion(QByteArray)), this, SLOT(onReceivedFromCompanion(QByteArray)));
+
+    connect(&mRX, SIGNAL(mtuChanged(int)), this, SLOT(onMtuChanged(int)));
+    connect(&mTX, SIGNAL(mtuChanged(int)), this, SLOT(onMtuChanged(int)));
 
     QDBusInterface remoteOm(BLUEZ_SERVICE_NAME, "/", DBUS_OM_IFACE, mBus);
     if (remoteOm.isValid())
@@ -163,47 +168,17 @@ void BLE::onConnectedChanged() {
     }
 }
 
-// TODO: This should be determined dynamically based on the BLE MTU
-#define CHUNK_SIZE 240
-
 void BLE::sendToCompanion(const QByteArray &content) {
-    uint8_t seqNum = 0;
-    int currentIndex = 0;
-
-    while (currentIndex < content.size()) {
-        // The header is one bit of "there are more chunks" and 7 bits of
-        // sequence number to detect dropped messages
-        uint8_t header = (seqNum & 0x7F) |
-            ((currentIndex + CHUNK_SIZE-1) < content.size() ? 0x80 : 0);
-        QByteArray headerBA((char*)&header, sizeof(header));
-
-        mTX.sendToCompanion(headerBA + content.mid(currentIndex, CHUNK_SIZE - 1));
-
-        currentIndex += CHUNK_SIZE - 1;
-        seqNum++;
-    }
+    mTX.sendToCompanion(content);
 }
 
 void BLE::onReceivedFromCompanion(const QByteArray &content) {
-    static int8_t lastSeqNum = -1;
-
-    uint8_t header = content.at(0);
-    bool hasMore = !!(header & 0x80);
-    uint8_t seqNum = header & 0x7F;
-
-    if (seqNum != lastSeqNum + 1) {
-        mAccumulatedRecv = QByteArray();
-        lastSeqNum = -1;
-        return;
-    }
-
-    lastSeqNum = seqNum;
-    mAccumulatedRecv.append(content.mid(1, -1));
-
-    if (!hasMore) {
-        emit receivedFromCompanion(mAccumulatedRecv);
-        mAccumulatedRecv = QByteArray();
-        lastSeqNum = -1;
-    }
+    emit receivedFromCompanion(content);
 }
 
+void BLE::onMtuChanged(int mtu) {
+    if (mCurrentMtu != mtu) {
+        mCurrentMtu = mtu;
+        emit mtuChanged(mtu - 3);
+    }
+}

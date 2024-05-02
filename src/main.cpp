@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
 
     TAP tap;
     BLE ble;
+    QObject::connect(&ble, &BLE::mtuChanged, &tap, &TAP::mtuChanged);
     QObject::connect(&tap, &TAP::dataAvailable, &ble, &BLE::sendToCompanion);
     QObject::connect(&ble, &BLE::receivedFromCompanion, &tap, &TAP::send);
 

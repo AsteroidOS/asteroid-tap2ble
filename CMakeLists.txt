@@ -16,6 +16,6 @@ set(MAIN_SOURCE_FILES
 	src/ble.cpp)
 
 add_executable(asteroid-tap2ble ${MAIN_SOURCE_FILES})
-target_link_libraries(asteroid-tap2ble resolv Qt5::Core Qt5::DBus)
+target_link_libraries(asteroid-tap2ble Qt5::Core Qt5::DBus)
 
 install(TARGETS asteroid-tap2ble DESTINATION bin)

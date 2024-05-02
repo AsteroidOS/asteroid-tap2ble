@@ -34,9 +34,9 @@
 #define TX_PATH          "/org/asteroidos/tap2ble/service/tx"
 #define RX_PATH          "/org/asteroidos/tap2ble/service/rx"
 
-#define SERVICE_UUID "00001071-0000-0000-0000-00A57E401D05"
-#define RX_UUID      "00001001-0000-0000-0000-00A57E401D05"
-#define TX_UUID      "00001002-0000-0000-0000-00A57E401D05"
+#define SERVICE_UUID "0000A071-0000-0000-0000-00A57E401D05"
+#define RX_UUID      "0000A001-0000-0000-0000-00A57E401D05"
+#define TX_UUID      "0000A002-0000-0000-0000-00A57E401D05"
 
 // Writable characteristic for companion to watch communication
 class RXChrc : public QObject
@@ -62,6 +62,7 @@ public slots:
 
 signals:
     void receivedFromCompanion(const QByteArray &);
+    void mtuChanged(int);
 };
 
 // Notifiable characteristic for watch to companion communication
@@ -86,12 +87,13 @@ public slots:
     void WriteValue(QByteArray value, QVariantMap options) {}
     void StartNotify() {}
     void StopNotify() {}
-    QByteArray ReadValue(QVariantMap) { return m_value; }
+    QByteArray ReadValue(QVariantMap);
 
     void sendToCompanion(QByteArray content);
 
 signals:
     void valueChanged();
+    void mtuChanged(int);
 
 private:
     void emitPropertiesChanged() {
