@@ -179,6 +179,6 @@ void BLE::onReceivedFromCompanion(const QByteArray &content) {
 void BLE::onMtuChanged(int mtu) {
     if (mCurrentMtu != mtu) {
         mCurrentMtu = mtu;
-        emit mtuChanged(mtu);
+        emit mtuChanged(mtu - 3);
     }
 }
